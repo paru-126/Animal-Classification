@@ -1,0 +1,19 @@
+# Virtual environment
+animal_classifier/
+venv/
+
+# Data files
+*.npy
+*.h5
+*.keras
+dataset/
+organized_data/
+
+# Visualizations
+*.png
+*.pdf
+
+# System files
+__pycache__/
+*.pyc
+.DS_Store

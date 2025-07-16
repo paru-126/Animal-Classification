@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Animal Classifier</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .upload-box { border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 20px 0; }
+        #result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+        .animal { background-color: #e6f7ff; border-left: 5px solid #1890ff; }
+        .other { background-color: #fff2e6; border-left: 5px solid #fa8c16; }
+        img { max-width: 100%; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Animal Classifier</h1>
+    <p>Upload an image to identify the animal (or 'other' if unknown)</p>
+    
+    <div class="upload-box">
+        <form id="upload-form">
+            <input type="file" name="file" id="file-input" accept="image/*">
+            <button type="submit">Classify</button>
+        </form>
+    </div>
+    
+    <div id="result" style="display: none;">
+        <h3>Result: <span id="prediction"></span></h3>
+        <p>Confidence: <span id="confidence"></span></p>
+        <img id="preview" src="">
+    </div>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('file-input');
+            const resultDiv = document.getElementById('result');
+            const predictionSpan = document.getElementById('prediction');
+            const confidenceSpan = document.getElementById('confidence');
+            const previewImg = document.getElementById('preview');
+            
+            if (fileInput.files.length === 0) return;
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                // Display results
+                predictionSpan.textContent = data.class;
+                confidenceSpan.textContent = (data.confidence * 100).toFixed(1) + '%';
+                previewImg.src = data.image_url + '?' + new Date().getTime(); // Cache bust
+                
+                // Style based on result
+                resultDiv.style.display = 'block';
+                resultDiv.className = data.class === 'other' ? 'other' : 'animal';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Classification failed');
+            });
+        });
+    </script>
+</body>
+</html>
